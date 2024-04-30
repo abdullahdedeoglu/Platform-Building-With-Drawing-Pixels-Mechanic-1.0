@@ -2,64 +2,64 @@ using UnityEngine;
 
 public class GridMaker : MonoBehaviour
 {
-    [SerializeField] private GameObject gridPrefab;
-    
-    [SerializeField] private float size;
+    [SerializeField] private GameObject gridPrefab; // Prefab for grid cells
+    [SerializeField] private float gridSize = 32; // Size of the grid (number of cells)
+    [SerializeField] private float distance = 0.28f; // Distance between grid cells
+    [SerializeField] private SceneScriptableObject sceneSO; // ScriptableObject containing scene data
 
-    [SerializeField] private float distance = 0.32f; //Pixel perfection fixes 
-
-    private Vector3 startingPosition;
-
-    private Sprite[] sprite;
-
-    [SerializeField] private SceneScriptableObject sceneSO;
+    private Vector3 startingPosition; // Starting position for grid creation
 
     private void Start()
     {
-        startingPosition = transform.position;
-
-        CreateGrid();
+        startingPosition = transform.position; // Store the starting position
+        CreateGrid(); // Create the grid
     }
 
     private void CreateGrid()
     {
-        int orderCount = 0;
-        for (int i = 0; i < size; i++) // Creating Grid With Starting From Top Left
-        {
-            for (int j = 0; j < size; j ++)
-            {
-                // Grid Creating
-                GameObject grid = Instantiate(gridPrefab) as GameObject;
+        int orderCount = 0; // Initialize order count for grid cells
 
+        // Loop through rows and columns to create grid cells
+        for (int i = 0; i < gridSize; i++)
+        {
+            for (int j = 0; j < gridSize; j++)
+            {
+                // Create a new grid cell
+                GameObject grid = Instantiate(gridPrefab, transform);
+                // Position the grid cell based on grid size and distance between cells
                 grid.transform.position = new Vector3(startingPosition.x + i * distance, startingPosition.y - j * distance, 0);
 
-                // Import The Scene View 
-                UniqueGrid currentUniqueGrid;
+                // Get the UniqueGrid component attached to the grid cell
+                UniqueGrid currentUniqueGrid = grid.GetComponent<UniqueGrid>();
 
-                currentUniqueGrid = grid.GetComponent<UniqueGrid>();
+                // Calculate the index of the sprite in the sceneSO.sceneSprites array
+                int spriteIndex = j * (int)gridSize + i;
 
-                currentUniqueGrid.sprites[0] = sceneSO.sceneSprites[(j*32) + i]; //Grid and sprite order differences
+                // Check if the sprite index is within the bounds of the sceneSO.sceneSprites array
+                if (spriteIndex < sceneSO.sceneSprites.Length)
+                {
+                    // Assign the sprite to the grid cell
+                    currentUniqueGrid.sprites[0] = sceneSO.sceneSprites[spriteIndex];
+                }
+                else
+                {
+                    // Log an error if there are not enough sprites in the sceneSO.sceneSprites array
+                    Debug.LogError("Not enough sprites in sceneSO.sceneSprites array.");
+                }
 
-                //Order Calculation Utilities (Will be deleted)
+                // Write the order number of the grid cell (will be deleted in final version)
                 currentUniqueGrid.WriteOrderNumber(orderCount);
 
-                //If current grid's order in collider order list, activate collider
+                // Check if the current grid cell should have a collider based on order count
+                if (sceneSO.collisionGridList.Contains(orderCount))
+                {
+                    // Activate the box collider of the grid cell
+                    currentUniqueGrid.ActivateBoxCollider();
+                }
 
-                bool hasCollider = sceneSO.collisionGridList.Contains(orderCount);
-
-                if (hasCollider) currentUniqueGrid.ActivateBoxCollider();
-               
+                // Increment the order count for the next grid cell
                 orderCount++;
             }
         }
     }
-
-    #region VALIDATION FILED
-
-        //private void OnValidate()
-        //{
-        //    CreateGrid();
-        //}
-
-    #endregion VALIDATION FIELD
 }

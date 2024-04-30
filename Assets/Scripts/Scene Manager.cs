@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,38 +8,45 @@ public class SceneManager : MonoBehaviour
 
     private void Start()
     {
-        SetCurrentScene(0, false);
+        LoadScene(0);
+    }
+
+    public void LoadScene(int sceneIndex)
+    {
+        if (sceneIndex < 0 || sceneIndex >= sceneSO.Count)
+        {
+            Debug.LogError("Invalid scene index: " + sceneIndex);
+            return;
+        }
+
+        currentScene = sceneSO[sceneIndex];
         SetSceneAdjustments();
     }
 
-    public void SetCurrentScene(int sceneIndex, bool isChanging) //Get current scene by index
+    private void SetSceneAdjustments()
     {
-        currentScene = sceneSO[sceneIndex];
-
-        if(isChanging) //Just for security, i know script can be better. Will change. 
+        if (currentScene == null)
         {
-            SetSceneAdjustments();
+            Debug.LogError("Current scene is null.");
+            return;
         }
-    }
-    private void SetSceneAdjustments() // Add Details Of Scriptable Objects By Hand But in Code Because Of Laziness
-    {
+
         currentScene.collisionGridList.Clear();
 
-        // Attach which grids will has collider by their sorting order in grid, very static system,
-        // either coder will set things or graphic designer draw scenes by code rules because it depends on scene
-
+        // Set collision grids based on scene-specific rules
         if (currentScene == sceneSO[0])
         {
-            
-            for (int i = 21; i < 406; i += 32) //21-405
-            {
-                currentScene.collisionGridList.Add(i);
-            }
-            
-            for (int j = 597; j < 1014; j += 32) //597-1013
-            {
-                currentScene.collisionGridList.Add(j);
-            }
+            AddCollisionGridRange(21, 406, 32);
+            AddCollisionGridRange(597, 1014, 32);
+        }
+        // Add other scenes' collision grid configurations here
+    }
+
+    private void AddCollisionGridRange(int start, int end, int step)
+    {
+        for (int i = start; i < end; i += step)
+        {
+            currentScene.collisionGridList.Add(i);
         }
     }
 }

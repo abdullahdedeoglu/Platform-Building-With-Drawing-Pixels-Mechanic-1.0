@@ -4,37 +4,39 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private Rigidbody2D rb;
+    private Rigidbody2D rb; // Reference to the Rigidbody2D component attached to the player
 
-    [SerializeField] private float moveSpeed = 3f;
-    private float moveHorizontal;
+    [SerializeField] private float moveSpeed = 3f; // Speed at which the player moves
+    private float moveHorizontal; // Horizontal input from the player
 
     private void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody2D>(); // Get the Rigidbody2D component attached to the player
     }
 
     private void Update()
     {
-        GetInput();
+        GetInput(); // Get player input
     }
 
     private void FixedUpdate()
     {
-        MovePlayer();
+        MovePlayer(); // Move the player based on input
     }
 
     private void GetInput()
     {
-        // Get Axis Inputs
+        // Get horizontal axis input
         moveHorizontal = Input.GetAxisRaw("Horizontal");
     }
 
     private void MovePlayer()
     {
-        if(moveHorizontal >0.1f || moveHorizontal < 0.1f)
+        // Move the player horizontally based on input
+        if (Mathf.Abs(moveHorizontal) > 0.1f)
         {
-            rb.AddForce(new Vector2 (moveHorizontal * moveSpeed * Time.deltaTime, 0f), ForceMode2D.Impulse);
+            // Apply force to the player in the horizontal direction
+            rb.AddForce(new Vector2(moveHorizontal * moveSpeed * Time.deltaTime, 0f), ForceMode2D.Impulse);
         }
     }
 }
